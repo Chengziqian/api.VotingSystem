@@ -12,8 +12,11 @@ const handler = async (ctx, next) => {
   try {
     await next();
   } catch (e) {
+    console.log(e);
     ctx.response.status = e.statusCode || e.status || 500;
-    ctx.response.body = e;
+    if (ctx.response.status === 422) ctx.response.body = e.inputError;
+    else if (ctx.response.status !== 500) ctx.response.body = e;
+    else ctx.response.body = e
   }
 };
 
