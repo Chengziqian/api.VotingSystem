@@ -24,7 +24,7 @@ exports.up = function(db) {
 };
 
 exports.down = function(db) {
-  return db.dropTable('users_races').then(function (res) {
+  return db.dropTable('users_vote').then(function (res) {
   }, function (err) {
     throw err
   });

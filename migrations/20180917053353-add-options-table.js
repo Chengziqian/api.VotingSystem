@@ -24,7 +24,10 @@ exports.up = function(db) {
 };
 
 exports.down = function(db) {
-  return null;
+  return db.dropTable('options').then(function (res) {
+  }, function (err) {
+    throw err
+  });
 };
 
 exports._meta = {

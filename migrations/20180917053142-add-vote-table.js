@@ -22,6 +22,7 @@ exports.up = function(db) {
     end_time: {type: 'datetime', notNull: true},
     name: {type: 'string', notNull: true},
     introduction: {type: 'string'},
+    type: {type: 'int'},
     create_user_id: {type: 'int'}
   });
 };
