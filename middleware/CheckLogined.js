@@ -21,7 +21,7 @@ module.exports = async function (ctx, next) {
       let user = await DB.GET('users', 'id', res[0].user_id);
       if (user.length === 0) ctx.throw(401, '请先登录');
       else {
-        ctx.request.USER = user[0];
+        ctx.USER = user[0];
         return next();
       }
     } else {

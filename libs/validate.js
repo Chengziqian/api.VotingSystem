@@ -40,6 +40,15 @@ module.exports = function (data, roles, callback) {
                 }
               }
               break;
+            case (/^array$/.test(o.type)):
+              if (Array.isArray(data[key])) {
+                if (o.errorMessage) {
+                  pushError(errorList, key, o.errorMessage);
+                } else {
+                  pushError(errorList, key, key + ' is not a array');
+                }
+              }
+              break;
             case (/^email$/.test(o.type)):
               if (!/^[A-Za-z0-9._%-]+@([A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$/.test(data[key])) {
                 if (o.errorMessage) {
@@ -79,7 +88,7 @@ module.exports = function (data, roles, callback) {
               }
               break;
             default:
-              throw 'role unsupported';
+              throw key + ' role unsupported';
           }
         })
       } else {
@@ -94,7 +103,7 @@ module.exports = function (data, roles, callback) {
         })
       }
     } else {
-      throw 'role property undefined'
+      throw key + ' role property undefined'
     }
   }
   if (JSON.stringify(errorList) === '{}') {

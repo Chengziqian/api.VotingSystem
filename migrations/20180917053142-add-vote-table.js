@@ -23,6 +23,8 @@ exports.up = function(db) {
     name: {type: 'string', notNull: true},
     introduction: {type: 'string'},
     type: {type: 'int'},
+    count: {type: 'int', defaultValue: 1},
+    anonymous: {type: 'int', defaultValue: 1},
     create_user_id: {type: 'int'}
   });
 };

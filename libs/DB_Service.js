@@ -16,6 +16,7 @@ function createConnection(config) {
     dateStrings: true
   });
   return {
+    POOL: pool,
     INSERT: function (tableName, data) {
       return new Promise((resolve, reject) => {
         pool.getConnection(function (err, connection) {
@@ -112,21 +113,38 @@ function createConnection(config) {
         });
       });
     },
-    GET_IN_CONDITIONS: function (tableName, conditionsObj) {
-      let sql = '';
-      for (let key in conditionsObj) {
-        let s = " ?? = ? AND";
-        if (conditionsObj.hasOwnProperty(key))
-          s = mysql.format(s, [key, conditionsObj[key]])
-        sql += s;
+    GET_IN_CONDITIONS: function (tableName, conditionsObj_IN_AND, conditionsObj_IN_OR) {
+      let sql_and = '';
+      let sql_or = '';
+      if (conditionsObj_IN_AND) {
+        for (let key in conditionsObj_IN_AND) {
+          let s = " ?? = ? AND";
+          if (conditionsObj_IN_AND.hasOwnProperty(key))
+            s = mysql.format(s, [key, conditionsObj_IN_AND[key]])
+          sql_and += s;
+        }
+        sql_and = sql_and.slice(0, sql_and.length - 3);
       }
-      sql = sql.slice(0, sql.length - 3);
+      if (conditionsObj_IN_OR) {
+        for (let key in conditionsObj_IN_OR) {
+          let s = " ?? = ? OR";
+          if (conditionsObj_IN_OR.hasOwnProperty(key))
+            s = mysql.format(s, [key, conditionsObj_IN_OR[key]])
+          sql_or += s;
+        }
+        sql_or = sql_or.slice(0, sql_or.length - 3);
+      }
+      let sql_end;
+      if (sql_and && sql_or) {
+        sql_end = sql_and + " OR " + sql_or;
+      } else if (sql_and) sql_end = sql_and;
+      else sql_end = sql_or;
       let table_sql = 'SELECT * FROM ?? WHERE';
       table_sql = mysql.format(table_sql, [tableName]);
       return new Promise ((resolve, reject) => {
         pool.getConnection(function (err, connection) {
           if (err) reject(err);
-          connection.query(table_sql + sql, (err, res, field) => {
+          connection.query(table_sql + sql_end, (err, res, field) => {
             connection.release();
             if (err) reject(err);
             else resolve(res);
@@ -159,6 +177,22 @@ function createConnection(config) {
             });
         });
       });
+    },
+    SERACH: function (tableName, SEARCH_CONDITIONS, filed) {
+      return new Promise((resolve, reject) => {
+        pool.getConnection(function (err, connection) {
+          if (err) reject(err);
+          let conditions = 'WHERE ?? ' + SEARCH_CONDITIONS;
+          let sql = mysql.format(conditions, [filed]);
+          let pre_sql = "SELECT * FROM ?? ";
+          pre_sql = mysql.format(pre_sql, tableName);
+          connection.query(pre_sql + sql, (err, res, field) => {
+            connection.release();
+            if (err) reject(err);
+            else resolve(res);
+          })
+        })
+      })
     }
   };
 }
