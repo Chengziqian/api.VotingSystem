@@ -1,5 +1,5 @@
 const color = require('colors');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const readline = require('readline');
 const env = process.env.NODE_ENV || 'development';
 let config;

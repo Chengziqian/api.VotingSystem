@@ -19,7 +19,6 @@ module.exports = {
         type: Sequelize.DATE
       },
       vote_id: {
-        allowNull: false,
         type: Sequelize.INTEGER
       },
       updated_at: {

@@ -41,7 +41,7 @@ module.exports = function (data, roles, callback) {
               }
               break;
             case (/^array$/.test(o.type)):
-              if (Array.isArray(data[key])) {
+              if (!Array.isArray(data[key])) {
                 if (o.errorMessage) {
                   pushError(errorList, key, o.errorMessage);
                 } else {

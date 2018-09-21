@@ -13,7 +13,6 @@ module.exports = {
         type: Sequelize.STRING
       },
       group_id: {
-        allowNull: false,
         type: Sequelize.INTEGER
       },
       created_at: {

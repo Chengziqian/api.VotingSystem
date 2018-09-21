@@ -10,11 +10,9 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       member_id: {
-        allowNull: false,
         type: Sequelize.STRING
       },
       group_id: {
-        allowNull: false,
         type: Sequelize.INTEGER
       },
       created_at: {
