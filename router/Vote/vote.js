@@ -1,7 +1,7 @@
 const Router = require('koa-router');
 const validate = require('../../libs/validate');
 const CheckLogined = require('../../middleware/CheckLogined');
-const DB = require('../../libs/DB_Service');
+const DB = require('../../models');
 let router = new Router();
 
 let valid = {
@@ -9,9 +9,7 @@ let valid = {
   introduction: [{type: 'string'}],
   start_time: [{type: 'required'},{type: 'date'}],
   end_time: [{type: 'date'},{type: 'required'}],
-  type: [{type: 'integer'},{type: 'required'}],
-  count: [{type: 'integer'},{type: 'required'}],
-  member: [{type: 'array'}]
+  count: [{type: 'integer'},{type: 'required'}]
 };
 
 router.post('/', CheckLogined, async (ctx, next) => {
@@ -21,26 +19,19 @@ router.post('/', CheckLogined, async (ctx, next) => {
   return next();
 }, async (ctx, next) => {
   let data = ctx.request.body;
-  let res = await DB.INSERT('vote', {
+  let res = await DB.Vote.create({
     name: data.name,
     introduction: data.introduction || null,
     start_time: data.start_time,
     end_time: data.end_time,
-    type: data.type,
-    count: data.count,
-    create_user_id: ctx.USER.id
+    count: data.count
   });
-  if (data.hasOwnProperty('member')) {
-    let member = JSON.parse(data.member);
-    for (let i = 0; i < member.length; i++) {
-      await DB.INSERT('users_vote', {user_id: member[i], vote_id: res.insertId});
-    }
-  }
+  await ctx.USER.addVotes([res]);
   ctx.response.status = 200;
 });
 
 router.get('/', CheckLogined, async function (ctx, next) {
-  ctx.response.body = await DB.GET_IN_CONDITIONS('vote', null, {create_user_id: ctx.USER.id, type: 0});
+  ctx.response.body = await DB.Vote.findAll();
 });
 
 module.exports = router;

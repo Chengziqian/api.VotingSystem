@@ -4,9 +4,9 @@ let router = new Router();
 
 router.get('/', CheckLogined, async function (ctx, next) {
   let data = ctx.USER;
-  delete data['password'];
+  delete data.dataValues['password'];
   ctx.response.status = 200;
   ctx.response.body = data;
 });
 
-module.exports = router
+module.exports = router;

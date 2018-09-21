@@ -1,13 +1,18 @@
+const color = require('colors');
+const env = process.env.NODE_ENV || 'development';
+let cc = {};
+try {
+  cc = require(__dirname + '/./config/config.json')[env];
+} catch (e) {
+  cc.app_port = 4000;
+  console.warn(('[WRONING]: File config.josn Not Found in ./config, DatabaseService will be offline').red);
+}
 const Koa = require('koa');
 const logger = require('koa-logger');
 const bodyParser = require('koa-bodyparser');
 const Router = require('./router/index');
-let cc;
-try {
-  cc = require('./.config')
-} catch (e) {
-  cc = require('./.config.example')
-}
+const AddTokenTime = require('./middleware/AddTokenTime');
+
 const handler = async (ctx, next) => {
   try {
     await next();
@@ -24,9 +29,10 @@ const app = new Koa();
 app.use(logger());
 app.use(bodyParser());
 app.use(handler);
+app.use(AddTokenTime);
 app.use(Router.routes());
 app.use(Router.allowedMethods());
 
 
-app.listen(cc.port || process.env.PORT);
-console.log('app started at port '+ cc.port || process.env.PORT +'...');
+app.listen(cc.app_port || process.env.PORT);
+console.log('app started at port '+ cc.app_port || process.env.PORT +'...');

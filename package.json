@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./app.js",
     "generateDB": "node ./db_generate",
-    "migrate": "db-migrate"
+    "sequelize": "node_modules/.bin/sequelize"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,9 @@
     "koa-logger": "^3.2.0",
     "koa-router": "^7.4.0",
     "moment": "^2.22.2",
-    "mysql": "^2.16.0",
+    "mysql2": "^1.6.1",
+    "sequelize": "^4.38.1",
+    "sequelize-cli": "^4.1.1",
     "uuid": "^3.3.2"
   }
 }

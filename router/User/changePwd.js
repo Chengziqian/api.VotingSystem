@@ -2,7 +2,7 @@ const Router = require('koa-router');
 const CheckLogined = require('../../middleware/CheckLogined');
 const crypto = require('crypto');
 const validate = require('../../libs/validate');
-const DB = require('../../libs/DB_Service');
+const DB = require('../../models');
 
 let router = new Router();
 
@@ -20,7 +20,7 @@ router.put('/changePwd', CheckLogined, async function (ctx, next) {
   let old_pwd = crypto.createHash('sha256').update(ctx.request.body.password_old).digest('hex');
   if (old_pwd === ctx.USER.password) {
     let pwd = crypto.createHash('sha256').update(ctx.request.body.password_new).digest('hex');
-    await DB.SAVE('users', 'id', ctx.USER.id, {password: pwd});
+    await DB.User.update({password: pwd}, {where: {id: ctx.USER.id}});
     ctx.response.status = 200;
   } else {
     ctx.throw(422, {inputError: {password_old: ["旧密码不正确"]}})

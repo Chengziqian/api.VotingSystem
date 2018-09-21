@@ -3,7 +3,7 @@ const moment = require('moment');
 const uuid = require('uuid/v1');
 const crypto = require('crypto');
 const validate = require('../../libs/validate');
-const DB = require('../../libs/DB_Service');
+const DB = require('../../models/');
 let router = new Router();
 
 let getClientIp = function (req) {
@@ -25,19 +25,19 @@ router.post('/login', async (ctx, next) => {
 }, async (ctx, next) => {
   let token = {};
   let user = {};
-  let res = await DB.GET('users', 'username', ctx.request.body.username);
-  if (res.length === 0) ctx.throw(401, '用户名或密码错误');
+  let res = await DB.User.findOne({where: {username: ctx.request.body.username}});
+  if (!res) ctx.throw(401, '用户名或密码错误');
   else {
     let psw = crypto.createHash('sha256').update(ctx.request.body.password).digest('hex');
-    if (res[0].password === psw) {
-      user = res[0];
+    if (res.password === psw) {
+      user = res;
       token = {
-        user_id: res[0].id,
+        user_id: res.id,
         token: uuid(),
         ip: getClientIp(ctx.request),
         expired_time: moment().add(20, 'm').format('YYYY-MM-DD HH:mm:ss')
       };
-      await DB.INSERT('api_token', token);
+      await DB.Api_Token.create(token);
       ctx.response.body = {user_id: user.id, access: user.access, token: token.token}
     } else {
       ctx.throw(401, '用户名或密码错误');
