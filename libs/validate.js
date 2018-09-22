@@ -87,6 +87,20 @@ module.exports = function (data, roles, callback) {
                 }
               }
               break;
+            case (/^available$/.test(o.type)):
+              if (o.hasOwnProperty('available')) {
+                let eu = o.available;
+                if (eu.indexOf(data[key]) === -1) {
+                  if (o.errorMessage) {
+                    pushError(errorList, key, o.errorMessage);
+                  } else {
+                    pushError(errorList, key, 'only [' + eu.toLocaleString() + '] is available');
+                  }
+                }
+              } else {
+                throw 'no available instance'
+              }
+              break;
             default:
               throw key + ' role unsupported';
           }

@@ -40,15 +40,15 @@ router.post('/', CheckLogined, async (ctx, next) => {
       }
       await t.commit();
     } catch (e) {
-      console.log(e)
       await t.rollback();
+      throw (e);
     }
   })();
   ctx.response.status = 200;
 });
 
 router.get('/', CheckLogined, async function (ctx, next) {
-  ctx.response.body = await DB.Vote.findAll();
+  ctx.response.body = await DB.Vote.findAll({include: [{model: DB.Option, attributes:['name']}]});
 });
 
 module.exports = router;

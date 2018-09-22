@@ -11,7 +11,8 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Vote);
     User.hasOne(models.Api_Token);
     User.hasMany(models.Group);
-    User.belongsToMany(models.Group, {as: 'group', through: 'members_groups', foreignKey: 'member_id', otherKey: 'group_id'})
+    User.belongsToMany(models.Group, {as: {singular: 'Group', plural: 'Groups'}, through: 'members_groups', foreignKey: 'member_id', otherKey: 'group_id'});
+    User.belongsToMany(models.Vote, {as: {singular:'HasVote', plural: 'HasVotes'}, through: 'votedMembers_votes', foreignKey: 'votedMember_id', otherKey: 'vote_id'})
   };
   return User;
 };
