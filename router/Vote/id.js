@@ -7,7 +7,7 @@ let router = new Router();
 
 router.get('/:id/result', CheckLogined, async (ctx, next) => {
   let vote = await DB.Vote.findById(ctx.params.id);
-  if (await ctx.USER.hasHasVote(vote)) {
+  if (await ctx.USER.hasHasVote(vote) || !(moment().isBetween(moment(vote.start_time), moment(vote.end_time)))) {
     ctx.response.body = await vote.getOptions({attributes: ['id', 'count', 'name']});
   } else {
     ctx.throw(402, '请先投票');
