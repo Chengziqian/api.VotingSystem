@@ -48,7 +48,7 @@ router.post('/', CheckLogined, async (ctx, next) => {
 });
 
 router.get('/', CheckLogined, async function (ctx, next) {
-  ctx.response.body = await DB.Vote.findAll({include: [{model: DB.Option, attributes:['name']}]});
+  ctx.response.body = await ctx.USER.getVotes({include: [{model: DB.Option, attributes:['name']}]});
 });
 
 module.exports = router;

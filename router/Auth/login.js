@@ -23,22 +23,19 @@ router.post('/login', async (ctx, next) => {
   });
   return next();
 }, async (ctx, next) => {
-  let token = {};
-  let user = {};
-  let res = await DB.User.findOne({where: {username: ctx.request.body.username}});
-  if (!res) ctx.throw(401, '用户名或密码错误');
+  let user = await DB.User.findOne({where: {username: ctx.request.body.username}});
+  if (!user) ctx.throw(401, '用户名或密码错误');
   else {
     let psw = crypto.createHash('sha256').update(ctx.request.body.password).digest('hex');
-    if (res.password === psw) {
-      user = res;
-      token = {
-        user_id: res.id,
+    if (user.password === psw) {
+      let tokenData = {
         token: uuid(),
         ip: getClientIp(ctx.request),
         expired_time: moment().add(20, 'm').format('YYYY-MM-DD HH:mm:ss')
       };
-      await DB.Api_Token.create(token);
-      ctx.response.body = {user_id: user.id, access: user.access, token: token.token}
+      let token = await DB.Api_Token.create(tokenData);
+      await token.setUser(user);
+      ctx.response.body = {user: {id: user.id, access: user.access, username: user.username}, api_token: token.token}
     } else {
       ctx.throw(401, '用户名或密码错误');
     }

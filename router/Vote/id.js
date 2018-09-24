@@ -5,19 +5,35 @@ const DB = require('../../models');
 const moment = require('moment');
 let router = new Router();
 
-router.get('/:id/result', async (ctx, next) => {
+router.get('/:id/result', CheckLogined, async (ctx, next) => {
   let vote = await DB.Vote.findById(ctx.params.id);
-  ctx.response.body = await vote.getOptions({attributes: ['id', 'count', 'name']});
+  if (await ctx.USER.hasHasVote(vote)) {
+    ctx.response.body = await vote.getOptions({attributes: ['id', 'count', 'name']});
+  } else {
+    ctx.throw(402, '请先投票');
+  }
+});
+
+router.get('/:id/isVoted', CheckLogined, async (ctx, next) => {
+  let vote = await DB.Vote.findById(ctx.params.id);
+  if (await ctx.USER.hasHasVote(vote)) ctx.response.body = {isVoted: true};
+  else {
+    ctx.response.body = {isVoted: false};
+  }
 });
 
 router.get('/:id', CheckLogined, async (ctx, next) => {
-  ctx.response.body = await DB.Vote.findById(ctx.params.id, {include: [{model: DB.Option, attributes:['name']}]})
+  ctx.response.body = await DB.Vote.findById(ctx.params.id, {include: [{model: DB.Option, attributes:['id', 'name']}]})
 });
 
 router.del('/:id', CheckLogined, async (ctx, next) => {
   let vote = await DB.Vote.findById(ctx.params.id);
-  await vote.destroy();
-  ctx.response.status = 200;
+  if (await ctx.USER.hasVote(vote)) {
+    await vote.destroy();
+    ctx.response.status = 200;
+  } else {
+    ctx.throw(402, '您没有权限删除不属于您的投票')
+  }
 });
 
 let valid = {
@@ -50,7 +66,7 @@ router.post('/:id', CheckLogined, async (ctx, next) => {
                 let o = await DB.Option.findById(+ctx.request.body.options[i], {transaction: t});
                 await o.update({count: (+o.count) + 1}, {transaction: t});
               }
-              await ctx.USER.setHasVotes([vote]);
+              await ctx.USER.addHasVotes([vote]);
               await t.commit();
               ctx.response.status = 200;
             } catch (e) {

@@ -4,6 +4,9 @@ const DB = require('../../models');
 const Op = require('sequelize').Op;
 let router = new Router();
 
+router.get('/hasVoted', CheckLogined, async function (ctx, next) {
+  ctx.response.body = await ctx.USER.getHasVotes({include: [{model: DB.Option, attributes:['name']}]});
+});
 
 router.get('/:username', CheckLogined, async function (ctx, next) {
   if (!ctx.params.username) ctx.throw(422, {inputError: {username: ['username is required']}});
@@ -15,6 +18,7 @@ router.get('/:username', CheckLogined, async function (ctx, next) {
   }));
   ctx.response.body = res;
 });
+
 
 module.exports = router;
 
