@@ -39,12 +39,12 @@ router.post('/', CheckLogined, async (ctx, next) => {
         await vote.addOptions([option], {transaction: t})
       }
       await t.commit();
+      ctx.response.body = {id: vote.id};
     } catch (e) {
       await t.rollback();
       throw (e);
     }
   })();
-  ctx.response.status = 200;
 });
 
 router.get('/', CheckLogined, async function (ctx, next) {
