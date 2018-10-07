@@ -24,4 +24,52 @@ router.get('/:id', CheckLogined, async (ctx, next) => {
   }
 });
 
+router.put('/:id', CheckLogined, async (ctx, next) => {
+  let group = await DB.Group.findById(ctx.params.id);
+  if (await ctx.USER.hasGroup(group)) {
+    let t;
+    let options = ctx.request.body.content;
+    await (async () => {
+      try {
+        t = await DB.sequelize.transaction();
+        await group.update({name: ctx.request.body.name, type: ctx.request.body.type});
+        switch (ctx.request.body.type) {
+          case 'users':
+            let index = options.map(o => ({id: o}));
+            let users = await DB.User.findAll({where: {[DB.sequelize.Op.or]: index}, transaction: t});
+            await group.setMembers(users, {transaction: t});
+            break;
+          case 'options':
+            let arr = [];
+            for (let i = 0; i < options.length; i++) {
+              let option = await DB.Pre_Option.create({name: options[i]}, {transaction: t});
+              arr.push(option);
+            }
+            await group.setOptions(arr, {transaction: t});
+            break;
+          default:
+            break;
+        }
+        await t.commit();
+        ctx.response.status = 200;
+      } catch (e) {
+        await t.rollback();
+        ctx.throw(e)
+      }
+    })()
+  } else {
+    ctx.throw(402, '您没有权限修改不属于您的预设')
+  }
+});
+
+router.del('/:id', CheckLogined, async (ctx, next) => {
+  let group = await DB.Group.findById(ctx.params.id);
+  if (await ctx.USER.hasGroup(group)) {
+    await group.destroy();
+    ctx.response.status = 200;
+  } else {
+    ctx.throw(402, '您没有权限删除不属于您的预设')
+  }
+});
+
 module.exports = router;
