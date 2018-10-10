@@ -7,10 +7,14 @@ const DB = require('../../models/');
 let router = new Router();
 
 let getClientIp = function (req) {
-  return req.ip || req.headers['x-forwarded-for'] ||
+  let ip = req.ip || req.headers['x-forwarded-for'] ||
     req.connection.remoteAddress ||
     req.socket.remoteAddress ||
     req.connection.socket.remoteAddress || '';
+  if (proxyType === 'nginx') {
+    ip = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || ip;
+  }
+  return ip;
 };
 let logon_valid = {
   username: [{type:'required'},{type:'string'}],
